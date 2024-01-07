@@ -1,4 +1,7 @@
 var lineCount = 0;
+var ttlStyle = "";
+var lineStyle = "";
+var switchState = [false,false,false,false,false,false,false,false];
 
 function connectPoints() {
     var point1Id = document.getElementById('point1Input').value;
@@ -22,12 +25,12 @@ function connectPoints() {
 
     //alert("line_id = "+line.id);
 
-    var x1 = point1.offsetLeft + point1.clientWidth / 2;
-    var y1 = point1.offsetTop + point1.clientHeight / 2;
-    var x2 = point2.offsetLeft + point2.clientWidth / 2;
-    var y2 = point2.offsetTop + point2.clientHeight / 2;
+    var x1 = point1.offsetLeft + point1.offsetWidth / 2;
+    var y1 = point1.offsetTop + point1.offsetHeight / 2;
+    var x2 = point2.offsetLeft + point2.offsetWidth / 2;
+    var y2 = point2.offsetTop + point2.offsetHeight / 2;
 
-    alert("point1:("+x1+","+y1+")"+" "+"point2:("+x2+","+y2+")");
+    //alert("point1:("+x1+","+y1+")"+" "+"point2:("+x2+","+y2+")");
 
     var deltaX = x2 - x1;
     var deltaY = y2 - y1;
@@ -37,8 +40,11 @@ function connectPoints() {
 
     line.style.width = length + 'px';
     line.style.transform = 'rotate(' + angle + 'deg)';
-    line.style.left = x1 + 'px';
-    line.style.top = y1 + 'px';
+    line.style.left = ((x1==x2)?(x1+1):x1) + 'px';
+    line.style.top = ((y1==y2)?(y1-1):y1) + 'px';
+
+    //alert("color = "+lineStyle);
+    line.style.borderColor = lineStyle;
 
     document.body.appendChild(line);
 }
@@ -73,31 +79,66 @@ function createTTL() {
         return;
     }
 
-    var line = document.createElement('div');
-    line.className = 'line';
-    line.id = point5Id+point6Id;
+    var ttl = document.createElement('div');
+    ttl.className = 'ttl';
+    ttl.id = point5Id+point6Id;
 
     var x1 = point5.offsetLeft + point5.clientWidth / 2;
     var y1 = point5.offsetTop + point5.clientHeight / 2;
     var x2 = point6.offsetLeft + point6.clientWidth / 2;
     var y2 = point6.offsetTop + point6.clientHeight / 2;
 
-    alert("point1:("+x1+","+y1+")"+" "+"point2:("+x2+","+y2+")");
+    //alert("point1:("+x1+","+y1+")"+" "+"point2:("+x2+","+y2+")");
 
-    var deltaX = x2 - x1;
-    var deltaY = y2 - y1;
+    var deltaX = Math.abs(x2 - x1);
+    var deltaY = Math.abs(y2 - y1);
 
-    alert("width:"+deltaX+" , "+"height:"+deltaY);
-    //var length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    //alert("width:"+deltaX+" , "+"height:"+deltaY);
 
-    line.style.width = deltaX + 'px';
-    line.style.height = deltaY + 'px';
-    line.style.left = x1 + 'px';
-    line.style.top = y1 + 'px';
+    ttl.style.width = deltaX + 'px';
+    ttl.style.height = deltaY + 'px';
+    ttl.style.left = ((x1<=x2)?x1:x2) + 'px';
+    ttl.style.top = ((y1<=y2)?y1:y2) + 'px';
 
-    document.body.appendChild(line);
+    var textElement = document.createElement('span');
+    textElement.style.lineHeight = deltaY + 'px';
+    textElement.textContent = ttlStyle;
+
+    ttl.appendChild(textElement);
+    document.body.appendChild(ttl);
 }
-/*
-point1:(56.5,134.5) point2:(119.5,166.5)
-width:63 , height:32
-*/
+function deleteTTL() {
+    var point7Id = document.getElementById('point7Input').value;
+    var point8Id = document.getElementById('point8Input').value;
+
+    var point7 = document.getElementById(point7Id);
+    var point8 = document.getElementById(point8Id);
+
+    if (!point7 || !point8) {
+        alert('Invalid point IDs');
+        return;
+    }
+
+    var ttl = document.getElementById(point7Id+point8Id);
+    document.body.removeChild(ttl);
+}
+
+var dropdown = document.getElementById('dropdown');
+var selectColor = document.getElementById('selectColor');
+
+selectColor.addEventListener('change', function() {
+    lineStyle = selectColor.value;
+});
+dropdown.addEventListener('change', function() {
+    ttlStyle = dropdown.value;
+});
+
+function Switch(index) {
+    switchState[index] = !switchState[index];
+    var button = document.getElementsByClassName('switch-style')[index];
+    if (switchState[index]) {
+        button.classList.add('clicked');
+    } else {
+        button.classList.remove('clicked');
+    }
+}
